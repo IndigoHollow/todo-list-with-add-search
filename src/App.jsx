@@ -8,21 +8,29 @@ class App extends Component {
     this.handleAddTask = this.handleAddTask.bind(this);
     this.handleAddWork = this.handleAddWork.bind(this);
     this.handlefindHobby = this.handlefindHobby.bind(this);
+    this.handlefindWork = this.handlefindWork.bind(this);
   }
 
   handleAddTask() {
-    this.props.onAddTask(this.addTask.value);
-    this.addTask.value = "";
+    if (this.addTask.value) {
+      this.props.onAddTask(this.addTask.value);
+      this.addTask.value = "";
+    }
   }
 
   handleAddWork() {
-    this.props.onAddWork(this.addTask.value);
-    this.addTask.value = "";
+    if (this.addTask.value) {
+      this.props.onAddWork(this.addTask.value);
+      this.addTask.value = "";
+    }
   }
 
   handlefindHobby() {
-    console.log("Find track", this.searchTask.value);
     this.props.onSearchHobby(this.searchTask.value);
+  }
+
+  handlefindWork() {
+    this.props.onSearchWork(this.searchTask.value);
   }
 
   render() {
@@ -35,8 +43,18 @@ class App extends Component {
           <button onClick={this.handleAddWork}>Add Work</button>
         </div>
         <div>
-          <input type="text" ref={input => (this.searchTask = input)} />
-          <button onClick={this.handlefindHobby}>Find hobby</button>
+          <input
+            type="text"
+            placeholder="Find hobby"
+            ref={input => (this.searchTask = input)}
+            onChange={this.handlefindHobby}
+          />
+          <input
+            type="text"
+            placeholder="Find work"
+            ref={input => (this.searchTask = input)}
+            onChange={this.handlefindWork}
+          />
         </div>
         <p>Hobbies list</p>
         <ul className="listHobbies">
@@ -46,7 +64,7 @@ class App extends Component {
         </ul>
         <p>Work list</p>
         <ul className="listWork">
-          {this.props.work.map((value, key) => <li key={key}>{value}</li>)}
+          {this.props.work.map((value, key) => <li key={key}>{value.name}</li>)}
         </ul>
       </React.Fragment>
     );
@@ -58,7 +76,7 @@ export default connect(
     hobbies: state.reducerHobby.filter(hobby =>
       hobby.name.includes(state.filterHobbies)
     ),
-    work: state.reducerWork
+    work: state.reducerWork.filter(work => work.name.includes(state.filterWork))
   }),
   dispatch => ({
     onAddTask: name => {
@@ -71,15 +89,25 @@ export default connect(
         payload
       });
     },
-    onAddWork: taskName => {
+    onAddWork: name => {
+      const payload = {
+        id: Date.now().toString(),
+        name
+      };
       dispatch({
         type: "ADD_WORK",
-        payload: taskName
+        payload
       });
     },
     onSearchHobby: name => {
       dispatch({
         type: "SEARCH_HOBBY",
+        payload: name
+      });
+    },
+    onSearchWork: name => {
+      dispatch({
+        type: "SEARCH_WORK",
         payload: name
       });
     }
